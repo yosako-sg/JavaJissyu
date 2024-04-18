@@ -1,0 +1,3 @@
+-- 今は、JPA(Hibername)のDDL自動生成および自動適用機能を利用。
+-- 以下の記事も参照
+-- https://spring.pleiades.io/spring-boot/docs/current/reference/html/howto.html#howto.data-initialization.using-basic-sql-scripts
