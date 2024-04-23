@@ -3,18 +3,18 @@
 <div th:fragment="content">
     <form th:action="@{/charge/search}" th:object="{chargeSearchCondition}" method="POST">
         <div class="mb-3 row">
-            <label class="col-sm-2 col-form-label" for="charge_name">料金名</label>
+            <label class="col-sm-2 col-form-label" for="name">料金名</label>
             <div class="col-sm-10">
-                <input class="form-control" type="text" th:field="*{charge_name}" />
+                <input class="form-control" type="text" th:field="*{name}" />
             </div>
         </div>
-        <!--/* <div class="mb-3 row">
+        <div class="mb-3 row">
             <label class="col-sm-2 col-form-label"></label>
             <div class="col-sm-10">
                 <button type="submit" class="btn btn-primary">検索</button>
-                <a class="btn btn-secondary" th:href="@{/charge/add}">追加</a>
+                <!--/* <a class="btn btn-secondary" th:href="@{/charge/add}">登録</a> */-->
             </div>
-        </div> */-->
+        </div>
     </form>
 </div>
 

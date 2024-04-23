@@ -22,9 +22,9 @@
                 <td>
                     <a th:href="@{/charge/edit/{id}(id=${row.chargeId})}" th:text="${row.chargeId}"></a>
                 </td>
-                <td th:text="${row.charge_name}"></td>
-                <td th:text="${row.charge_kind}"></td>
-                <td th:text="${row.charge}"></td>
+                <td th:text="${row.name}"></td>
+                <td th:text="${row.kind}"></td>
+                <td th:text="${row.amount}"></td>
                 <td th:text="${#dates.format(row.startDate, 'yyyy/MM/dd')}"></td>
                 <td th:text="${#dates.format(row.endDate, 'yyyy/MM/dd')}"></td>
             </tr>
