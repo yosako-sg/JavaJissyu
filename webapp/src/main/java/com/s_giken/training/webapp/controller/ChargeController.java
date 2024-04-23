@@ -41,4 +41,48 @@ public class ChargeController {
         model.addAttribute("result", result);
         return "charge_search_result";
     }
+
+    @GetMapping("/edit/{id}")
+    public String editCharge(
+            @PathVariable int id, Model model) {
+        var charge = chargeService.findById(id);
+        if (!charge.isPresent()) {
+            throw new NotFoundException(String.format("指定したchargeId(%d)の料金情報が存在しません。", id));
+        }
+        model.addAttribute("charge", charge);
+        return "charge_edit";
+    }
+
+    @GetMapping("/add")
+    public String addCharge(Model model) {
+        var charge = new Charge();
+        model.addAttribute("charge", charge);
+        return "charge_edit";
+    }
+
+    @PostMapping("/save")
+    public String saveCharge(
+            @Validated Charge charge,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            return "charge_edit";
+        }
+        chargeService.save(charge);
+        redirectAttributes.addFlashAttribute("message", "保存しました。");
+        return "redirect:/charge/edit/" + charge.getChargeId();
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deletCharge(
+            @PathVariable int id,
+            RedirectAttributes redirectAttributes) {
+        var charge = chargeService.findById(id);
+        if (!charge.isPresent()) {
+            throw new NotFoundException(String.format("指定したchargeId(%d)の加入者情報が存在しません。", id));
+        }
+        chargeService.deleteById(id);
+        redirectAttributes.addFlashAttribute("message", "削除しました");
+        return "redirect:/charge/search";
+    }
 }

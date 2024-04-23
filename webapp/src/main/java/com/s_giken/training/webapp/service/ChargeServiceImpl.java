@@ -30,4 +30,14 @@ public class ChargeServiceImpl implements ChargeService {
     public List<Charge> findByConditions(ChargeSearchCondition chargeSearchCondition) {
         return chargeRepository.findByNameLike("%" + chargeSearchCondition.getName() + "%");
     }
+
+    @Override
+    public void save(Charge charge) {
+        chargeRepository.save(charge);
+    }
+
+    @Override
+    public void deleteById(int chargeId) {
+        chargeRepository.deleteById(chargeId);
+    }
 }
