@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "T_MEMBER")
+@Table(name = "T_CHARGE")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

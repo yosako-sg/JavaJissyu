@@ -18,7 +18,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 
 @Controller
-@RequestMapping("/member")
+@RequestMapping("/charge")
 public class ChargeController {
     private final ChargeService chargeService;
 
