@@ -38,11 +38,6 @@ public class Charge {
     @NotBlank
     private String name;
 
-    @Column(name = "kind")
-    @NotNull
-    @NotBlank
-    private int kind;
-
     @Column(name = "amount")
     @NotNull
     private int amount;
