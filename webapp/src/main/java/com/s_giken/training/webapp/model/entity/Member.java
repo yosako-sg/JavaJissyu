@@ -63,6 +63,7 @@ public class Member {
 
     @Column(name = "address")
     @NotNull
+    @NotBlank
     private String address;
 
     @Column(name = "start_date")

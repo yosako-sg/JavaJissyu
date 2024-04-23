@@ -40,7 +40,7 @@ public class Charge {
 
     @Column(name = "amount")
     @NotNull
-    private int amount;
+    private Number amount;
 
     @Column(name = "start_date")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
