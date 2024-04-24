@@ -22,10 +22,12 @@ import org.springframework.validation.annotation.Validated;
 public class ChargeController {
     private final ChargeService chargeService;
 
+    // 料金管理機能のコントローラークラスのコンストラクタ
     public ChargeController(ChargeService chargeService) {
         this.chargeService = chargeService;
     }
 
+    // 料金名検索画面を表示する
     @GetMapping("/search")
     public String showsearchCondition(Model model) {
         var chargeSearchCondition = new ChargeSearchCondition();
@@ -33,6 +35,7 @@ public class ChargeController {
         return "charge_search_condition";
     }
 
+    // 料金名検索結果画面を表示する
     @PostMapping("/search")
     public String searchAndListing(
             @ModelAttribute("chargeSearchCondition") ChargeSearchCondition chargeSearchCondition,
@@ -42,6 +45,7 @@ public class ChargeController {
         return "charge_search_result";
     }
 
+    // 料金情報編集画面を表示する
     @GetMapping("/edit/{id}")
     public String editCharge(
             @PathVariable int id, Model model) {
@@ -53,6 +57,7 @@ public class ChargeController {
         return "charge_edit";
     }
 
+    // 料金情報通貨画面を表示する
     @GetMapping("/add")
     public String addCharge(Model model) {
         var charge = new Charge();
@@ -60,6 +65,7 @@ public class ChargeController {
         return "charge_edit";
     }
 
+    // 料金情報を保存する
     @PostMapping("/save")
     public String saveCharge(
             @Validated Charge charge,
@@ -73,6 +79,7 @@ public class ChargeController {
         return "redirect:/charge/edit/" + charge.getChargeId();
     }
 
+    // 料金情報を削除する
     @GetMapping("/delete/{id}")
     public String deletCharge(
             @PathVariable int id,
