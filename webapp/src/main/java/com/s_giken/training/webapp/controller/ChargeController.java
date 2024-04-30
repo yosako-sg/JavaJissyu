@@ -86,7 +86,7 @@ public class ChargeController {
             RedirectAttributes redirectAttributes) {
         var charge = chargeService.findById(id);
         if (!charge.isPresent()) {
-            throw new NotFoundException(String.format("指定したchargeId(%d)の加入者情報が存在しません。", id));
+            throw new NotFoundException(String.format("指定したchargeId(%d)の料金情報が存在しません。", id));
         }
         chargeService.deleteById(id);
         redirectAttributes.addFlashAttribute("message", "削除しました");
