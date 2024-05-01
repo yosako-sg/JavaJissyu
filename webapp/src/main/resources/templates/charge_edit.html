@@ -41,7 +41,7 @@
                 <a class="btn-link" th:href="@{/charge/search}">キャンセル</a>
                 <span class="d-flex flex-row-reverse bd-highlight"><!-- position-absolute end-0 -->
                     <span class="bd-highlight">
-                        <a id="delete" class="btn btn-secondary" th:href="@{/charge/delete/{id}}">削除</a>
+                        <a id="delete" class="btn btn-secondary" th:href="@{/charge/delete/{id}(id=${id})}">削除</a>
                     </span>
                 </span>
             </div>
