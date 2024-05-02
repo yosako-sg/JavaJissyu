@@ -60,6 +60,12 @@
             <div class="col-sm-10">
                 <button type="submit" class="btn btn-primary">保存</button>
                 <a class="btn btn-link" th:href="@{/member/search}">キャンセル</a>
+                <span th:if="${id != null}"
+                    class="d-flex flex-row-reverse bd-highlight"><!-- position-absolute end-0 -->
+                    <span class="bd-highlight">
+                        <a id="delete" class="btn btn-secondary" th:href="@{/member/delete/{id}(id=${id})}">削除</a>
+                    </span>
+                </span>
             </div>
         </div>
     </form>
@@ -74,7 +80,7 @@
             // 取得した要素がクリックされた時に実行される関数を登録。
             deleteBtn.addEventListener("click", (e) => {
                 // 確認画面を表示
-                let result = confirm("id:[[${memberId}]]を削除してもよろしいですか？");
+                let result = confirm("加入者番号[[${id}]]を削除してもよろしいですか？");
                 if (!result) {
                     // もし、キャンセルが押されたら、クリックされた要素動作を取りやめる
                     e.preventDefault();

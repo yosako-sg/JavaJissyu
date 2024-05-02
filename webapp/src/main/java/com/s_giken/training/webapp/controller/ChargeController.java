@@ -29,7 +29,8 @@ public class ChargeController {
 
     // 料金名検索画面を表示する
     @GetMapping("/search")
-    public String showsearchCondition(Model model) {
+    public String showsearchCondition(
+            Model model) {
         var chargeSearchCondition = new ChargeSearchCondition();
         model.addAttribute("chargeSearchCondition", chargeSearchCondition);
         return "charge_search_condition";
@@ -48,7 +49,8 @@ public class ChargeController {
     // 料金情報編集画面を表示する
     @GetMapping("/edit/{id}")
     public String editCharge(
-            @PathVariable int id, Model model) {
+            @PathVariable int id,
+            Model model) {
         var charge = chargeService.findById(id);
         if (!charge.isPresent()) {
             throw new NotFoundException(String.format("指定したchargeId(%d)の料金情報が存在しません。", id));
@@ -59,7 +61,8 @@ public class ChargeController {
 
     // 料金情報通貨画面を表示する
     @GetMapping("/add")
-    public String addCharge(Model model) {
+    public String addCharge(
+            Model model) {
         var charge = new Charge();
         model.addAttribute("charge", charge);
         return "charge_edit";
@@ -89,7 +92,7 @@ public class ChargeController {
             throw new NotFoundException(String.format("指定したchargeId(%d)の料金情報が存在しません。", id));
         }
         chargeService.deleteById(id);
-        redirectAttributes.addFlashAttribute("message", "削除しました");
+        redirectAttributes.addFlashAttribute("message", "削除しました。");
         return "redirect:/charge/search";
     }
 }

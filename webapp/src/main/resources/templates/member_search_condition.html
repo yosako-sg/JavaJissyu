@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html th:replace="~{layout/app :: layout('加入者検索', ~{::content}, 'member')}">
 <div th:fragment="content">
+  <div th:if="!${#strings.isEmpty(message)}" class="alert alert-success">
+    <span th:text="${message}"></span>
+  </div>
   <!--/* 加入者情報検索画面 */-->
   <form th:action="@{/member/search}" th:object="${memberSearchCondition}" method="POST">
     <!--/* メールアドレス */-->
