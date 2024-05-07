@@ -11,7 +11,6 @@ import com.s_giken.training.webapp.exception.NotFoundException;
 import com.s_giken.training.webapp.model.entity.Charge;
 import com.s_giken.training.webapp.model.entity.ChargeSearchCondition;
 import com.s_giken.training.webapp.service.ChargeService;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
