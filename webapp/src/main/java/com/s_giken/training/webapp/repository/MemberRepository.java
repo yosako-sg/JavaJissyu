@@ -2,6 +2,7 @@ package com.s_giken.training.webapp.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.s_giken.training.webapp.model.entity.Member;
 
@@ -24,4 +25,6 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
 
     // TODO: 名前でも検索できるようにメソッドを定義しなおす
     public List<Member> findByMailOrNameLike(String mail, String name);
+
+    public List<Member> findByMailOrNameLike(String mail, String name, Sort sort);
 }
