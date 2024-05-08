@@ -14,7 +14,7 @@
         <div class="form-group mb-3 row">
             <label class="col-sm-2 col-form-label" for="category">表示順</label>
             <div class="col-sm-2">
-                <select class="form-control" name="category">
+                <select class="form-control" th:field="*{category}">
                     <option value="chargeId">料金番号</option>
                     <option value="name">料金名</option>
                     <option value="amount">月額料金</option>
@@ -23,7 +23,7 @@
                 </select>
             </div>
             <div class="col-sm-1">
-                <select class="form-control" name="sort">
+                <select class="form-control" th:field="*{sort}">
                     <option value="ASC">昇順</option>
                     <option value="DESC">降順</option>
                 </select>

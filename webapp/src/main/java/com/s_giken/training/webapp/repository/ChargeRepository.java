@@ -9,5 +9,5 @@ import com.s_giken.training.webapp.model.entity.Charge;
 public interface ChargeRepository extends JpaRepository<Charge, Integer> {
     public List<Charge> findByNameLike(String name);
 
-    public List<Charge> findAll(String category, Sort sort);
+    public List<Charge> findByNameLike(String name, Sort sort);
 }

@@ -3,7 +3,7 @@ package com.s_giken.training.webapp.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Sort;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.s_giken.training.webapp.model.entity.Charge;
 import com.s_giken.training.webapp.model.entity.ChargeSearchCondition;
@@ -33,9 +33,9 @@ public class ChargeServiceImpl implements ChargeService {
     //料金名を条件検索する
     @Override
     public List<Charge> findByConditions(ChargeSearchCondition chargeSearchCondition) {
-        chargeRepository.findAll(
-                new Sort(chargeSearchCondition.getSort(), "chargeSearchCondition.getCategory()"));
-        return chargeRepository.findByNameLike("%" + chargeSearchCondition.getName() + "%");
+        Sort sort = Sort.by(Sort.Direction.fromString(chargeSearchCondition.getSort()),
+                chargeSearchCondition.getCategory());
+        return chargeRepository.findByNameLike("%" + chargeSearchCondition.getName() + "%", sort);
     }
 
     // 料金情報を登録する
