@@ -54,7 +54,6 @@ public class MemberServiceImpl implements MemberService {
      */
     @Override
     public List<Member> findByConditions(MemberSearchCondition memberSearchCondition) {
-        // TODO: 氏名検索用メソッドを呼び出すように修正
         Sort sort = Sort.by(Sort.Direction.fromString(memberSearchCondition.getSort()),
                 memberSearchCondition.getCategory());
         return memberRepository.findByMailLikeOrNameLike(

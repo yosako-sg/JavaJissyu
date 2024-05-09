@@ -23,7 +23,6 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
      * https://docs.spring.io/spring-data/jpa/docs/1.11.1.RELEASE/reference/html/# jpa.query-methods
      */
 
-    // TODO: 名前でも検索できるようにメソッドを定義しなおす
     public List<Member> findByMailLikeOrNameLike(String mail, String name);
 
     public List<Member> findByMailLikeOrNameLike(String mail, String name, Sort sort);
