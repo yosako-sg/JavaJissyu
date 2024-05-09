@@ -57,7 +57,8 @@ public class MemberServiceImpl implements MemberService {
         // TODO: 氏名検索用メソッドを呼び出すように修正
         Sort sort = Sort.by(Sort.Direction.fromString(memberSearchCondition.getSort()),
                 memberSearchCondition.getCategory());
-        return memberRepository.findByMailOrNameLike("%" + memberSearchCondition.getMail() + "%",
+        return memberRepository.findByMailLikeOrNameLike(
+                "%" + memberSearchCondition.getMail() + "%",
                 "%" + memberSearchCondition.getName() + "%", sort);
     }
 
