@@ -1,7 +1,7 @@
 package com.s_giken.training.batch;
 
-import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,14 +56,20 @@ public class BatchApplication implements CommandLineRunner {
 			year = args[0].substring(0, 4);
 			month = args[0].substring(4);
 
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
-			LocalDate date = LocalDate.parse(args[0], formatter);
-
 			System.out.println(year + "年" + month + "月分の請求情報を確認しています。");
 
-			if (date.equals(this.jdbcTemplate.queryForObject(
-					"SELECT billing_ym FROM T_BILLING_STATUS WHERE is_commited = true",
-					LocalDate.class))) {
+			//書き直したい
+			LocalDate date = LocalDate.parse(args[0], DateTimeFormatter.ofPattern("yyyyMM"));
+
+			LocalDate localDate = this.jdbcTemplate.queryForObject(
+					"SELECT COUNT(*) FROM T_BILLING_STATUS WHERE billing_ym = ? AND is_commit = true",
+					LocalDate.class, date);
+			DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMM");
+			String localString = localDate.format(dateTimeFormatter);
+			int count = Integer.parseInt(localString);
+
+			if (count > 0) {
+				System.out.println("対象年月が含まれているレコードが存在したため、処理を中断します。");
 				return;
 			} else {
 				this.jdbcTemplate.execute(
@@ -73,16 +79,17 @@ public class BatchApplication implements CommandLineRunner {
 						"ALTER TABLE T_BILLING__DATA ADD FOREIGN KEY(billing_ym) REFERENCES T_BILLING_STATUS(billing_ym) ON DELETE CASCADE");
 
 				this.jdbcTemplate.update(
-						"DELETE FROM T_BILLING_STATUS WHERE billing_ym = date");
+						"DELETE FROM T_BILLING_STATUS WHERE billing_ym = ?", date);
 
 				System.out.println("データベースから" + year + "年" + month + "月分の未確定請求情報を削除しました。");
 
 				System.out.println(year + "年" + month + "請求ステータス情報を追加しています。");
 
 				this.jdbcTemplate.update(
-						"INSERT INTO T_BILLING_STATUS(billing_ym, is_commit) VALUES(date, false)");
+						"INSERT INTO T_BILLING_STATUS(billing_ym, is_commit) VALUES(?, false)",
+						date);
 			}
-
+			// 修正必要
 			this.jdbcTemplate.execute(
 					"ALTER TABLE T_BILLING_DATA ADD FOREIGN KEY(member_id) REFERENCES T_MEMBER(member_id)");
 
@@ -91,7 +98,7 @@ public class BatchApplication implements CommandLineRunner {
 
 			this.jdbcTemplate.execute(
 					"ALTER TABLE T_BILLING_DETAIL_DATA ADD FOREIGN KEY(charge_id) REFERENCES T_CHARGE(charge_id)");
-
+			//修正必要
 			this.jdbcTemplate.queryForObject(
 					"SELECT * FROM T_MEMBER WHERE (start_date <= EOMONTH(date)) AND (end_date IS NULL OR end_date >= DATEADD(dd, 1, EOMONTH(date, -1)))",
 					LocalDate.class);
