@@ -52,7 +52,7 @@ public class BatchApplication implements CommandLineRunner {
 
 			LocalDate yearMonth = this.parseLocalDate(args);
 
-			this.billingData(yearMonth);
+			this.createBillingData(yearMonth);
 
 		} catch (ArrayIndexOutOfBoundsException e) {
 			logger.error("エラー：請求対象年月が入力されていません。", e);
@@ -79,7 +79,7 @@ public class BatchApplication implements CommandLineRunner {
 
 	// 請求データ作成
 	@Transactional
-	public void billingData(LocalDate yearMonth) {
+	public void createBillingData(LocalDate yearMonth) {
 		String yearMonthstr = yearMonth.format(DateTimeFormatter.ofPattern("yyyy年MM月"));
 
 		logger.info(String.format("%s分の請求情報を確認しています。", yearMonthstr));
@@ -91,88 +91,90 @@ public class BatchApplication implements CommandLineRunner {
 		if (count > 0) {
 			logger.info(String.format("%s分の請求明細はすでに確定しています。処理を中断します。", yearMonthstr));
 			return;
-		} else {
+		}
+
+		jdbcTemplate.update(
+				"DELETE FROM T_BILLING_STATUS WHERE billing_ym = ?", yearMonth);
+
+		jdbcTemplate.update(
+				"DELETE FROM T_BILLING_DETAIL_DATA WHERE billing_ym = ?", yearMonth);
+
+		jdbcTemplate.update(
+				"DELETE FROM T_BILLING_DATA WHERE billing_ym = ?", yearMonth);
+
+		logger.info(String.format("データベースから%s分の未確定請求情報を削除しました。", yearMonthstr));
+
+		logger.info(String.format("%s分の請求ステータス情報を追加しています。", yearMonthstr));
+
+		Integer countBillingStatus = jdbcTemplate.update(
+				"INSERT INTO T_BILLING_STATUS(billing_ym, is_commit) VALUES(?, false)", yearMonth);
+
+		logger.info(countBillingStatus + "件追加しました。");
+
+		logger.info(String.format("分の請求データ情報を追加しています。", yearMonthstr));
+
+		// 月初日と月末日
+		LocalDate firstDate = yearMonth;
+		LocalDate endDate = yearMonth.with(TemporalAdjusters.lastDayOfMonth());
+
+		// 条件に一致する料金情報をすべて取得
+		List<Map<String, Object>> chargeList =
+				jdbcTemplate.queryForList(
+						"SELECT * FROM T_CHARGE WHERE (start_date <= ?) AND (end_date IS NULL OR end_date >= ?)",
+						endDate, firstDate);
+
+		// 条件に一致する料金情報の月額料金を合計
+		int sum = jdbcTemplate.queryForObject(
+				"SELECT SUM(amount) FROM T_CHARGE WHERE (start_date <= ?) AND (end_date IS NULL OR end_date >= ?)",
+				Integer.class, endDate, firstDate);
+
+		// 条件に一致する加入者情報をすべて取得
+		List<Map<String, Object>> memberList =
+				jdbcTemplate.queryForList(
+						"SELECT * FROM T_MEMBER WHERE (start_date <= ?) AND (end_date IS NULL OR end_date >= ?)",
+						endDate, firstDate);
+
+		int countMember = 0;
+		int countCharge = 0;
+
+		// 条件に一致した加入者情報を基にそれぞれのデータを作成、テーブルを追加する
+		for (Map<String, Object> memberMap : memberList) {
+			// 対象年月
+			Date billing_ym = java.sql.Date.valueOf(yearMonth);
+			// 加入者情報の加入ID
+			Integer member_id = (Integer) memberMap.get("member_id");
+			// 請求データ作成
+			String mail = (String) memberMap.get("mail");
+			String memberName = (String) memberMap.get("name");
+			String address = (String) memberMap.get("address");
+			Date member_start_date = (Date) memberMap.get("start_date");
+			Date member_end_date = (Date) memberMap.get("end_date");
+			Integer payment_method = (Integer) memberMap.get("payment_method");
+			int amount = sum;
+			double tax_ratio = 0.1;
+			int total = (int) (amount * (1 + tax_ratio));
 
 			jdbcTemplate.update(
-					"DELETE FROM T_BILLING_STATUS WHERE billing_ym = ?", yearMonth);
+					"INSERT INTO T_BILLING_DATA (billing_ym, member_id, mail, name, address, start_date, end_date, payment_method, amount, tax_ratio, total) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+					billing_ym, member_id, mail, memberName, address, member_start_date,
+					member_end_date, payment_method, amount, tax_ratio, total);
 
-			jdbcTemplate.update(
-					"DELETE FROM T_BILLING_DETAIL_DATA WHERE billing_ym = ?", yearMonth);
+			countMember++;
 
-			jdbcTemplate.update(
-					"DELETE FROM T_BILLING_DATA WHERE billing_ym = ?", yearMonth);
-
-			logger.info(String.format("データベースから%s分の未確定請求情報を削除しました。", yearMonthstr));
-
-			logger.info(String.format("%s分の請求ステータス情報を追加しています。", yearMonthstr));
-
-			jdbcTemplate.update(
-					"INSERT INTO T_BILLING_STATUS(billing_ym, is_commit) VALUES(?, false)",
-					yearMonth);
-
-			logger.info("1件追加しました。");
-
-			logger.info(String.format("分の請求データ情報を追加しています。", yearMonthstr));
-
-			LocalDate firstDate = yearMonth;
-			LocalDate endDate = yearMonth.with(TemporalAdjusters.lastDayOfMonth());
-			// 1
-			List<Map<String, Object>> chargeList =
-					jdbcTemplate.queryForList(
-							"SELECT * FROM T_CHARGE WHERE (start_date <= ?) AND (end_date IS NULL OR end_date >= ?)",
-							endDate, firstDate);
-			// 2
-			int sum = jdbcTemplate.queryForObject(
-					"SELECT SUM(amount) FROM T_CHARGE WHERE (start_date <= ?) AND (end_date IS NULL OR end_date >= ?)",
-					Integer.class, endDate, firstDate);
-
-			List<Map<String, Object>> memberList =
-					jdbcTemplate.queryForList(
-							"SELECT * FROM T_MEMBER WHERE (start_date <= ?) AND (end_date IS NULL OR end_date >= ?)",
-							endDate, firstDate);
-
-			int countMember = 0;
-			int countCharge = 0;
-
-			//3
-			for (Map<String, Object> memberMap : memberList) {
-				// 対象年月
-				Date billing_ym = java.sql.Date.valueOf(yearMonth);
-				// 加入者情報の加入ID
-				Integer member_id = (Integer) memberMap.get("member_id");
-				// 請求データ作成
-				String mail = (String) memberMap.get("mail");
-				String memberName = (String) memberMap.get("name");
-				String address = (String) memberMap.get("address");
-				Date member_start_date = (Date) memberMap.get("start_date");
-				Date member_end_date = (Date) memberMap.get("end_date");
-				Integer payment_method = (Integer) memberMap.get("payment_method");
-				int amount = sum;
-				double tax_ratio = 0.1;
-				int total = (int) (amount * (1 + tax_ratio));
+			// 請求明細データ作成
+			for (Map<String, Object> chargeMap : chargeList) {
+				Integer charge_id = (Integer) chargeMap.get("charge_id");
+				String chargeName = (String) chargeMap.get("name");
+				int chargeAmount = (int) chargeMap.get("amount");
+				Date charge_start_date = (Date) chargeMap.get("start_date");
+				Date charge_end_date = (Date) chargeMap.get("end_date");
 
 				jdbcTemplate.update(
-						"INSERT INTO T_BILLING_DATA (billing_ym, member_id, mail, name, address, start_date, end_date, payment_method, amount, tax_ratio, total) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-						billing_ym, member_id, mail, memberName, address, member_start_date,
-						member_end_date, payment_method, amount, tax_ratio, total);
+						"INSERT INTO T_BILLING_DETAIL_DATA (billing_ym, member_id, charge_id, name, amount, start_date, end_date) VALUES(?, ?, ?, ?, ?, ?, ?)",
+						billing_ym, member_id, charge_id, chargeName, chargeAmount,
+						charge_start_date, charge_end_date);
 
-				countMember++;
-
-				// 請求明細データ作成
-				for (Map<String, Object> chargeMap : chargeList) {
-					Integer charge_id = (Integer) chargeMap.get("charge_id");
-					String chargeName = (String) chargeMap.get("name");
-					int chargeAmount = (int) chargeMap.get("amount");
-					Date charge_start_date = (Date) chargeMap.get("start_date");
-					Date charge_end_date = (Date) chargeMap.get("end_date");
-
-					jdbcTemplate.update(
-							"INSERT INTO T_BILLING_DETAIL_DATA (billing_ym, member_id, charge_id, name, amount, start_date, end_date) VALUES(?, ?, ?, ?, ?, ?, ?)",
-							billing_ym, member_id, charge_id, chargeName, chargeAmount,
-							charge_start_date, charge_end_date);
-
-					countCharge++;
-				}
+				countCharge++;
 			}
 
 			logger.info(countMember + "件追加しました。");
