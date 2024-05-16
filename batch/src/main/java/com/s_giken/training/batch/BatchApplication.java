@@ -54,8 +54,6 @@ public class BatchApplication implements CommandLineRunner {
 
 			this.createBillingData(yearMonth);
 
-		} catch (ArrayIndexOutOfBoundsException e) {
-			logger.error("エラー：請求対象年月が入力されていません。", e);
 		} catch (DateTimeException e) {
 			logger.error("エラー：請求対象年月は6文字の半角の数字、YYYYMMで入力してください。引数は1つのみです。", e);
 		} catch (NullPointerException e) {
@@ -85,8 +83,11 @@ public class BatchApplication implements CommandLineRunner {
 		logger.info(String.format("%s分の請求情報を確認しています。", yearMonthstr));
 
 		Integer count = jdbcTemplate.queryForObject(
-				"SELECT COUNT(*) FROM T_BILLING_STATUS WHERE billing_ym = ? AND is_commit = true",
-				Integer.class, yearMonth);
+				"""
+						SELECT COUNT(*)
+						FROM T_BILLING_STATUS
+						WHERE billing_ym = ? AND is_commit = true
+						""", Integer.class, yearMonth);
 
 		if (count > 0) {
 			logger.info(String.format("%s分の請求明細はすでに確定しています。処理を中断します。", yearMonthstr));
@@ -94,20 +95,36 @@ public class BatchApplication implements CommandLineRunner {
 		}
 
 		jdbcTemplate.update(
-				"DELETE FROM T_BILLING_STATUS WHERE billing_ym = ?", yearMonth);
+				"""
+						DELETE FROM T_BILLING_STATUS
+						WHERE billing_ym = ?
+						""", yearMonth);
 
 		jdbcTemplate.update(
-				"DELETE FROM T_BILLING_DETAIL_DATA WHERE billing_ym = ?", yearMonth);
+				"""
+						DELETE FROM T_BILLING_DETAIL_DATA
+						WHERE billing_ym = ?
+						""", yearMonth);
 
 		jdbcTemplate.update(
-				"DELETE FROM T_BILLING_DATA WHERE billing_ym = ?", yearMonth);
+				"""
+						DELETE FROM T_BILLING_DATA
+						WHERE billing_ym = ?
+							""", yearMonth);
 
 		logger.info(String.format("データベースから%s分の未確定請求情報を削除しました。", yearMonthstr));
 
 		logger.info(String.format("%s分の請求ステータス情報を追加しています。", yearMonthstr));
 
 		Integer countBillingStatus = jdbcTemplate.update(
-				"INSERT INTO T_BILLING_STATUS(billing_ym, is_commit) VALUES(?, false)", yearMonth);
+				"""
+						INSERT INTO T_BILLING_STATUS(
+							billing_ym,
+							is_commit
+						) VALUES (
+							?,
+							false
+						)""", yearMonth);
 
 		logger.info(countBillingStatus + "件追加しました。");
 
@@ -118,21 +135,28 @@ public class BatchApplication implements CommandLineRunner {
 		LocalDate endDate = yearMonth.with(TemporalAdjusters.lastDayOfMonth());
 
 		// 条件に一致する料金情報をすべて取得
-		List<Map<String, Object>> chargeList =
-				jdbcTemplate.queryForList(
-						"SELECT * FROM T_CHARGE WHERE (start_date <= ?) AND (end_date IS NULL OR end_date >= ?)",
-						endDate, firstDate);
+		List<Map<String, Object>> chargeList = jdbcTemplate.queryForList(
+				"""
+						SELECT *
+						FROM T_CHARGE
+						WHERE (start_date <= ?) AND (end_date IS NULL OR end_date >= ?)
+						""", endDate, firstDate);
 
 		// 条件に一致する料金情報の月額料金を合計
 		int sum = jdbcTemplate.queryForObject(
-				"SELECT SUM(amount) FROM T_CHARGE WHERE (start_date <= ?) AND (end_date IS NULL OR end_date >= ?)",
-				Integer.class, endDate, firstDate);
+				"""
+						SELECT SUM(amount)
+						FROM T_CHARGE
+						WHERE (start_date <= ?) AND (end_date IS NULL OR end_date >= ?)
+						""", Integer.class, endDate, firstDate);
 
 		// 条件に一致する加入者情報をすべて取得
-		List<Map<String, Object>> memberList =
-				jdbcTemplate.queryForList(
-						"SELECT * FROM T_MEMBER WHERE (start_date <= ?) AND (end_date IS NULL OR end_date >= ?)",
-						endDate, firstDate);
+		List<Map<String, Object>> memberList = jdbcTemplate.queryForList(
+				"""
+						SELECT *
+						FROM T_MEMBER
+						WHERE (start_date <= ?) AND (end_date IS NULL OR end_date >= ?)
+						""", endDate, firstDate);
 
 		int countMember = 0;
 		int countCharge = 0;
@@ -143,7 +167,7 @@ public class BatchApplication implements CommandLineRunner {
 			Date billing_ym = java.sql.Date.valueOf(yearMonth);
 			// 加入者情報の加入ID
 			Integer member_id = (Integer) memberMap.get("member_id");
-			// 請求データ作成
+
 			String mail = (String) memberMap.get("mail");
 			String memberName = (String) memberMap.get("name");
 			String address = (String) memberMap.get("address");
@@ -154,14 +178,28 @@ public class BatchApplication implements CommandLineRunner {
 			double tax_ratio = 0.1;
 			int total = (int) (amount * (1 + tax_ratio));
 
+			// 請求データ作成
 			jdbcTemplate.update(
-					"INSERT INTO T_BILLING_DATA (billing_ym, member_id, mail, name, address, start_date, end_date, payment_method, amount, tax_ratio, total) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+					"""
+							INSERT INTO T_BILLING_DATA (
+								billing_ym,
+								member_id,
+								mail,
+								name,
+								address,
+								start_date,
+								end_date,
+								payment_method,
+								amount,
+								tax_ratio,
+								total
+								) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+							""",
 					billing_ym, member_id, mail, memberName, address, member_start_date,
 					member_end_date, payment_method, amount, tax_ratio, total);
 
 			countMember++;
 
-			// 請求明細データ作成
 			for (Map<String, Object> chargeMap : chargeList) {
 				Integer charge_id = (Integer) chargeMap.get("charge_id");
 				String chargeName = (String) chargeMap.get("name");
@@ -169,8 +207,19 @@ public class BatchApplication implements CommandLineRunner {
 				Date charge_start_date = (Date) chargeMap.get("start_date");
 				Date charge_end_date = (Date) chargeMap.get("end_date");
 
+				// 請求明細データ作成
 				jdbcTemplate.update(
-						"INSERT INTO T_BILLING_DETAIL_DATA (billing_ym, member_id, charge_id, name, amount, start_date, end_date) VALUES(?, ?, ?, ?, ?, ?, ?)",
+						"""
+								INSERT INTO T_BILLING_DETAIL_DATA (
+									billing_ym,
+									member_id,
+									charge_id,
+									name,
+									amount,
+									start_date,
+									end_date
+									) VALUES (?, ?, ?, ?, ?, ?, ?)
+									""",
 						billing_ym, member_id, charge_id, chargeName, chargeAmount,
 						charge_start_date, charge_end_date);
 
