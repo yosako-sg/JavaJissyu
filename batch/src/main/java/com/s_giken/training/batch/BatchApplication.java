@@ -54,10 +54,12 @@ public class BatchApplication implements CommandLineRunner {
 
 			this.createBillingData(yearMonth);
 
+		} catch (ArrayIndexOutOfBoundsException e) {
+			logger.error("エラー：請求対象年月が未入力です。", e);
 		} catch (DateTimeException e) {
-			logger.error("エラー：請求対象年月は6文字の半角の数字、YYYYMMで入力してください。引数は1つのみです。", e);
+			logger.error("エラー：請求対象年月は6文字の半角の数字、YYYYMMで入力してください。引数は1つだけ入力してください。", e);
 		} catch (NullPointerException e) {
-			logger.error("エラー：入力された年月の加入者情報は存在していません", e);
+			logger.error("エラー：入力された年月の加入者情報または料金情報は存在していません", e);
 		} catch (RuntimeException e) {
 			logger.error("エラーが発生しました。", e);
 		} finally {
@@ -90,15 +92,9 @@ public class BatchApplication implements CommandLineRunner {
 						""", Integer.class, yearMonth);
 
 		if (count > 0) {
-			logger.info(String.format("%s分の請求明細はすでに確定しています。処理を中断します。", yearMonthstr));
+			logger.info(String.format("%s分の請求データはすでに確定しているため、処理を中断します。", yearMonthstr));
 			return;
 		}
-
-		jdbcTemplate.update(
-				"""
-						DELETE FROM T_BILLING_STATUS
-						WHERE billing_ym = ?
-						""", yearMonth);
 
 		jdbcTemplate.update(
 				"""
@@ -111,6 +107,12 @@ public class BatchApplication implements CommandLineRunner {
 						DELETE FROM T_BILLING_DATA
 						WHERE billing_ym = ?
 							""", yearMonth);
+
+		jdbcTemplate.update(
+				"""
+						DELETE FROM T_BILLING_STATUS
+						WHERE billing_ym = ?
+						""", yearMonth);
 
 		logger.info(String.format("データベースから%s分の未確定請求情報を削除しました。", yearMonthstr));
 
@@ -128,7 +130,7 @@ public class BatchApplication implements CommandLineRunner {
 
 		logger.info(countBillingStatus + "件追加しました。");
 
-		logger.info(String.format("分の請求データ情報を追加しています。", yearMonthstr));
+		logger.info(String.format("%s分の請求データ情報を追加しています。", yearMonthstr));
 
 		// 月初日と月末日
 		LocalDate firstDate = yearMonth;
@@ -225,13 +227,11 @@ public class BatchApplication implements CommandLineRunner {
 
 				countCharge++;
 			}
-
-			logger.info(countMember + "件追加しました。");
-
-			logger.info(String.format("%s分の請求明細データ情報を追加しています。", yearMonthstr));
-
-			logger.info(countCharge + "件追加しました。");
-
 		}
+		logger.info(countMember + "件追加しました。");
+
+		logger.info(String.format("%s分の請求明細データ情報を追加しています。", yearMonthstr));
+
+		logger.info(countCharge + "件追加しました。");
 	}
 }
