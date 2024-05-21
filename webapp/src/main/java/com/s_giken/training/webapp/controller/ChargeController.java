@@ -26,7 +26,7 @@ public class ChargeController {
         this.chargeService = chargeService;
     }
 
-    // 料金名検索画面を表示する
+    // 料金検索画面を表示する
     @GetMapping("/search")
     public String showsearchCondition(
             Model model) {
@@ -35,7 +35,7 @@ public class ChargeController {
         return "charge_search_condition";
     }
 
-    // 料金名検索結果画面を表示する
+    // 料金検索結果画面を表示する
     @PostMapping("/search")
     public String searchAndListing(
             @ModelAttribute("chargeSearchCondition") ChargeSearchCondition chargeSearchCondition,
@@ -45,7 +45,7 @@ public class ChargeController {
         return "charge_search_result";
     }
 
-    // 料金情報編集画面を表示する
+    // 料金編集画面を表示する
     @GetMapping("/edit/{id}")
     public String editCharge(
             @PathVariable int id,
@@ -58,7 +58,7 @@ public class ChargeController {
         return "charge_edit";
     }
 
-    // 料金情報通貨画面を表示する
+    // 料金新規追加画面を表示する
     @GetMapping("/add")
     public String addCharge(
             Model model) {

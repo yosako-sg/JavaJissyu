@@ -14,6 +14,7 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+// import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -32,7 +33,19 @@ public class Charge {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "charge_id")
     private int chargeId;
-
+    /*
+     * 番号を1から足していくやり方
+     * ※改善点にはならないけど、経験として残す
+     * 
+     * @Id
+     * 
+     * @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CHARGE_ID_SEQ")
+     * 
+     * @SequenceGenerator(name = "CHARGE_ID_SEQ", allocationSize = 1)
+     * 
+     * @Column(name = "charge_id")
+     * private int chargeId;
+     */
     @Column(name = "name")
     @NotNull
     @NotBlank
