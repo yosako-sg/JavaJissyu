@@ -39,7 +39,8 @@ public class SecurityConfig {
                         .failureUrl("/login?error")
                         .permitAll())
                 .logout((logout) -> logout
-                        .logoutSuccessUrl("/"))
+                        //.logoutSuccessUrl("/")
+                        .permitAll())
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**"))
                         .permitAll()

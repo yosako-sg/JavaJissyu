@@ -8,6 +8,9 @@
     <div th:if="${param.error}" class="alert alert-danger" role="alert">
       ユーザ名またはパスワードが間違っています。
     </div>
+    <div th:if="${param.logout}" class="alert alert-success" role="alert">
+      ログアウトしました。
+    </div>
     <div class="mb-3 row">
       <label class="col-sm-2 col-form-label" for="username">ユーザ名</label>
       <div class="col-sm-10">

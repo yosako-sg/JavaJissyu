@@ -50,7 +50,8 @@
           <li class="nav-item">
             <!--/* ログアウトリンク */-->
             <div sec:authorize="isAuthenticated()">
-              <a class="nav-link" th:classappend="|${usefunction == 'logout' ? 'active' : ''}|" th:href="@{/logout}">
+              <a id="logout" class="nav-link" th:classappend="|${usefunction == 'logout' ? 'active' : ''}|"
+                th:href="@{/logout}">
                 ログアウト
               </a>
             </div>
@@ -76,6 +77,20 @@
       </main>
     </div>
   </div>
+
+  <script th:inline="javascript">
+    // ログアウトリンクがクリックされた時の制御
+    document.addEventListener("DOMContentLoaded", (e) => {
+      const logoutLink = document.getElementById("logout");
+      logoutLink.addEventListener("click", (e) => {
+        let result = confirm("本当にログアウトしてもよろしいですか？");
+        if (!result) {
+          e.preventDefault();
+        }
+        return result;
+      });
+    });
+  </script>
 </body>
 
 </html>
