@@ -2,5 +2,12 @@
 <html th:replace="~{layout/app :: layout('トップ', ~{::content}, 'top')}">
 <div th:fragment="content">
     <p>上部メニューより機能を選択してください。</p>
+    <p>
+        ログインした日時：<span th:text="${loginDateTime}"></span>
+    </p>
+    <p>
+        前回ログインした日時：<span th:text="${lastLoginDateTime}"></span>
+    </p>
 </div>
+
 </html>
