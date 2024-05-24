@@ -13,6 +13,8 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+// import com.s_giken.training.webapp.controller.LoginSuccessHandler;
+
 /**
  * Spring Securityの設定クラス
  */
@@ -20,6 +22,8 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+    // private LoginSuccessHandler loginSuccessHandler;
+
     /**
      * Spring Securityの設定
      *
@@ -37,6 +41,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .loginPage("/login")
                         .failureUrl("/login?error")
+                        //.successHandler(loginSuccessHandler) // 今の状態で実行するとエラーが出るためコメントアウト
                         .permitAll())
                 .logout((logout) -> logout
                         //.logoutSuccessUrl("/")
