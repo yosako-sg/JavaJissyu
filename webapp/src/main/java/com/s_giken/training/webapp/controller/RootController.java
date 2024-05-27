@@ -1,9 +1,10 @@
 package com.s_giken.training.webapp.controller;
 
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.stereotype.Controller;
+import com.s_giken.training.webapp.service.LoginService;
 
 /**
  * ルートパスのコントローラークラス
@@ -11,13 +12,30 @@ import org.springframework.stereotype.Controller;
 @Controller
 @RequestMapping("/")
 public class RootController {
+	private LoginService loginService;
+
+	public RootController(LoginService loginService) {
+		this.loginService = loginService;
+	}
+
 	/**
 	 * ルートパスにアクセスされた場合の処理
 	 * 
 	 * @return トップ画面のテンプレート名
 	 */
 	@GetMapping("/")
-	public String hello() {
+	public String hello(Model model) {
+		var lastLoginDateTime = loginService.selectLastLoginDateTime();
+		var loginDateTime = loginService.selectLatestLoginDateTime();
+		if (lastLoginDateTime.isEmpty()) {
+			model.addAttribute("lastLoginDateTime", "前回のログインがありません。");
+			model.addAttribute("loginDateTime", loginDateTime);
+
+			return "top";
+		}
+		model.addAttribute("lastLoginDateTime", lastLoginDateTime);
+		model.addAttribute("loginDateTime", loginDateTime);
+
 		return "top";
 	}
 

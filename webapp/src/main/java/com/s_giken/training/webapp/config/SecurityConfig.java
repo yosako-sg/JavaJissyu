@@ -13,7 +13,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-// import com.s_giken.training.webapp.controller.LoginSuccessHandler;
+import com.s_giken.training.webapp.controller.LoginSuccessHandler;
 
 /**
  * Spring Securityの設定クラス
@@ -22,7 +22,11 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    // private LoginSuccessHandler loginSuccessHandler;
+    private final LoginSuccessHandler loginSuccessHandler;
+
+    public SecurityConfig(LoginSuccessHandler loginSuccessHandler) {
+        this.loginSuccessHandler = loginSuccessHandler;
+    }
 
     /**
      * Spring Securityの設定
@@ -41,10 +45,10 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .loginPage("/login")
                         .failureUrl("/login?error")
-                        //.successHandler(loginSuccessHandler) // 今の状態で実行するとエラーが出るためコメントアウト
+                        .successHandler(loginSuccessHandler) //ハンドラの追加(ログインが成功した時に実行される)
                         .permitAll())
                 .logout((logout) -> logout
-                        //.logoutSuccessUrl("/")
+                        //.logoutSuccessUrl("/")　ログアウトメッセージ表示前に使用していた
                         .permitAll())
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**"))
