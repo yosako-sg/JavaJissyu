@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.s_giken.training.webapp.service.LoginService;
+import io.micrometer.common.util.StringUtils;
 
 /**
  * ルートパスのコントローラークラス
@@ -27,7 +28,7 @@ public class RootController {
 	public String hello(Model model) {
 		var lastLoginDateTime = loginService.selectLastLoginDateTime();
 		var loginDateTime = loginService.selectLatestLoginDateTime();
-		if (lastLoginDateTime.isEmpty()) {
+		if (StringUtils.isEmpty(lastLoginDateTime)) {
 			model.addAttribute("lastLoginDateTime", "前回のログインがありません。");
 			model.addAttribute("loginDateTime", loginDateTime);
 
