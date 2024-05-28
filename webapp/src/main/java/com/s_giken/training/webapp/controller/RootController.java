@@ -1,9 +1,14 @@
 package com.s_giken.training.webapp.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.s_giken.training.webapp.model.entity.LoginSearchCondition;
 import com.s_giken.training.webapp.service.LoginService;
 import io.micrometer.common.util.StringUtils;
 
@@ -13,11 +18,13 @@ import io.micrometer.common.util.StringUtils;
 @Controller
 @RequestMapping("/")
 public class RootController {
+
 	private LoginService loginService;
 
 	public RootController(LoginService loginService) {
 		this.loginService = loginService;
 	}
+
 
 	/**
 	 * ルートパスにアクセスされた場合の処理
@@ -25,15 +32,22 @@ public class RootController {
 	 * @return トップ画面のテンプレート名
 	 */
 	@GetMapping("/")
-	public String hello(Model model) {
-		var lastLoginDateTime = loginService.selectLastLoginDateTime();
-		var loginDateTime = loginService.selectLatestLoginDateTime();
+	public String hello(
+			LoginSearchCondition loginSearchCondition,
+			Model model) {
+		SimpleDateFormat fmt = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss z");
+		fmt.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
+
+		var lastLoginDateTime = fmt.format(loginService.findByLast(loginSearchCondition));
+		var loginDateTime = fmt.format(loginService.findByLatest(loginSearchCondition));
+
 		if (StringUtils.isEmpty(lastLoginDateTime)) {
 			model.addAttribute("lastLoginDateTime", "前回のログインがありません。");
 			model.addAttribute("loginDateTime", loginDateTime);
 
 			return "top";
 		}
+
 		model.addAttribute("lastLoginDateTime", lastLoginDateTime);
 		model.addAttribute("loginDateTime", loginDateTime);
 

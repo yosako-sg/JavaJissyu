@@ -21,12 +21,13 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         this.loginService = loginService;
     }
 
+
     @Override
     public void onAuthenticationSuccess(
             HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
-        loginService.saveLoginDateTime();
+        //loginService.save();
 
         super.onAuthenticationSuccess(request, response, authentication);
     }
