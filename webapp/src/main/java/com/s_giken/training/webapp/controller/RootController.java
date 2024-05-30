@@ -1,7 +1,9 @@
 package com.s_giken.training.webapp.controller;
 
+import java.time.format.DateTimeFormatter;
+import java.util.NoSuchElementException;
+
 import org.springframework.stereotype.Controller;
-import org.springframework.util.CollectionUtils;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,20 +32,28 @@ public class RootController {
 	public String hello(
 			LoginSearchCondition loginSearchCondition,
 			Model model) {
-		var loginDateTime = loginService.findLatest(loginSearchCondition);
-		var lastLoginDateTime = loginService.findLast(loginSearchCondition);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+		String loginDateTime = null;
+		String lastLoginDateTime = null;
+
+		try {
+			loginDateTime = loginService
+					.findLatest(loginSearchCondition)
+					.get()
+					.format(formatter);
+			lastLoginDateTime = loginService
+					.findLast(loginSearchCondition)
+					.get()
+					.format(formatter);
+		} catch (NoSuchElementException e) {
+			model.addAttribute("loginDateTime", loginDateTime);
+			model.addAttribute("lastLoginDateTime", "前回のログインがありません。");
+
+			return "top";
+		}
 
 		model.addAttribute("loginDateTime", loginDateTime);
 		model.addAttribute("lastLoginDateTime", lastLoginDateTime);
-
-		/*
-		 * if (CollectionUtils.isEmpty(lastLoginDateTime)) {
-		 * model.addAttribute("lastLoginDateTime", "前回のログインがありません。");
-		 * model.addAttribute("loginDateTime", loginDateTime);
-		 * 
-		 * return "top";
-		 * }
-		 */
 
 		return "top";
 	}

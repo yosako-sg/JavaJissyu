@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpSession;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import com.s_giken.training.webapp.model.entity.Login;
@@ -17,8 +17,6 @@ import com.s_giken.training.webapp.repository.LoginRepository;
 public class LoginServiceImpl implements LoginService {
     private HttpSession session;
     private LoginRepository loginRepository;
-
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 
     // コンストラクタを作成
     public LoginServiceImpl(HttpSession session, LoginRepository loginRepository) {
@@ -43,23 +41,13 @@ public class LoginServiceImpl implements LoginService {
 
     // 最新のログイン日時を収得
     @Override
-    public String findLatest(LoginSearchCondition loginSearchCondition) {
-        String loginDateTimestr = loginRepository
-                .findByLoginDateTime(loginSearchCondition.getLoginDateTime())
-                .toString();
-        //LocalDateTime.parse(loginDateTimestr, formatter)
-        return loginDateTimestr;
+    public Optional<LocalDateTime> findLatest(LoginSearchCondition loginSearchCondition) {
+        return loginRepository.findByLoginDateTime(loginSearchCondition.getLoginDateTime());
     }
-
 
     // 前回のログイン日時を収得
-
     @Override
-    public String findLast(LoginSearchCondition loginSearchCondition) {
-        String lastLoginDateTimestr = loginRepository
-                .findByLastLoginDateTime(loginSearchCondition.getLoginDateTime())
-                .toString();
-        return lastLoginDateTimestr;
+    public Optional<LocalDateTime> findLast(LoginSearchCondition loginSearchCondition) {
+        return loginRepository.findByLastLoginDateTime(loginSearchCondition.getLoginDateTime());
     }
-
 }
