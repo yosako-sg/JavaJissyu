@@ -1,9 +1,8 @@
 package com.s_giken.training.webapp.controller;
 
-import java.time.format.DateTimeFormatter;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -32,28 +31,18 @@ public class RootController {
 	public String hello(
 			LoginSearchCondition loginSearchCondition,
 			Model model) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-
-		String loginDateTime = loginService
-				.findLatest(loginSearchCondition)
-				.get()
-				.format(formatter);
-
+		var loginDateTime = loginService.findLatest(loginSearchCondition);
 		var lastLoginDateTime = loginService.findLast(loginSearchCondition);
 
-		if (lastLoginDateTime.isPresent()) {
-			String lastLoginDateTimestr = lastLoginDateTime
-					.get()
-					.format(formatter);
-
+		if (ObjectUtils.isEmpty(lastLoginDateTime)) {
 			model.addAttribute("loginDateTime", loginDateTime);
-			model.addAttribute("lastLoginDateTime", lastLoginDateTimestr);
+			model.addAttribute("lastLoginDateTime", "前回のログインがありません。");
 
 			return "top";
 		}
 
 		model.addAttribute("loginDateTime", loginDateTime);
-		model.addAttribute("lastLoginDateTime", "前回のログインがありません。");
+		model.addAttribute("lastLoginDateTime", lastLoginDateTime);
 
 		return "top";
 	}
