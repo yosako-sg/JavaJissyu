@@ -34,14 +34,14 @@ public class RootController {
 		var loginDateTime = loginService.findLatest(loginSearchCondition);
 		var lastLoginDateTime = loginService.findLast(loginSearchCondition);
 
+		model.addAttribute("loginDateTime", loginDateTime);
+
 		if (ObjectUtils.isEmpty(lastLoginDateTime)) {
-			model.addAttribute("loginDateTime", loginDateTime);
 			model.addAttribute("lastLoginDateTime", "前回のログインがありません。");
 
 			return "top";
 		}
 
-		model.addAttribute("loginDateTime", loginDateTime);
 		model.addAttribute("lastLoginDateTime", lastLoginDateTime);
 
 		return "top";
